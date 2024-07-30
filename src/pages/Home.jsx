@@ -1,14 +1,95 @@
-import React from 'react'
-import HomeLayout from '../component/HomeLayout'
+import React from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import terrainService from "../service/terrain.service";
 
-const Home = () => {
+import HomeLayout from "../component/HomeLayout";
+
+const Home = () => {/* terrain Terrain*/ 
+  const [terrainList, setTerrainList] = useState([]);
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = () => {
+    terrainService
+      .getAllTerrain()
+      .then((res) => {
+        setTerrainList(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const deleteTerrain = (id) => {
+    terrainService
+      .deleteTerrain(id)
+      .then((res) => {
+        setMsg("Delete Sucessfully");
+        init();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  
   return (
     <>
-    <HomeLayout/>
-    <div>Home</div>
-    </>
-    
-  )
-}
+      <HomeLayout />
+      
+      <div className="container mt-8">
+        <div className="row">
+          <div className="col-md-12">
+            <div className="card">
+              <div className="card-header fs-3 text-center">
+                All Product List
+                {msg && <p className="fs-4 text-center text-success">{msg}</p>}
+              </div>
 
-export default Home
+              <div className="card-body">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Sl No</th>
+                      <th scope="col">Product Name</th>
+                      <th scope="col">Description</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {terrainList.map((p, num) => (
+                      <tr>
+                        <td>{num + 1}</td>
+                        <td>{p.terrainName}</td>
+                        <td>{p.description}</td>
+                        <td>{p.price}</td>
+                        <td>{p.status}</td>
+                        <td>
+                          <Link to={'editProduct/'+p.id} className="btn btn-primary">
+                            Edit
+                          </Link>
+                          <button
+                            onClick={() => deleteTerrain(p.id)}
+                            className="btn btn-danger ms-1"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Home;
